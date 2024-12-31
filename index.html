@@ -130,7 +130,7 @@
     </div>
     <script>
         
-        const width = 954;
+const width = 954;
 const height = 534;
 
 let isResizing = false;
@@ -203,6 +203,14 @@ function onMouseUp() {
 if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
     iframe.addEventListener('click', () => iframe.blur());
     iframe.addEventListener('mousemove', () => iframe.blur());
+
+    // Disable pointer events on the iframe temporarily when it's not in focus
+    iframe.addEventListener('mousedown', () => {
+        iframe.style.pointerEvents = 'none';  // Disable iframe interaction
+    });
+    iframe.addEventListener('mouseup', () => {
+        iframe.style.pointerEvents = ''; // Re-enable iframe interaction
+    });
 }
 
 // Resize logic
@@ -312,6 +320,7 @@ function closeComparePanel() {
     const iframe = document.getElementById("contentFrame");
     iframe.src = "";
 }
+
 
     </script
     </body>

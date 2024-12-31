@@ -129,193 +129,190 @@
         </div>
     </div>
     <script>
-        const width = 954;
-        const height = 534;
-
-        let isResizing = false;
-        let isDragging = false;
-        let currentHandle = null;
-        let startX, startY, startWidth, startHeight, startLeft, startTop;
-
-        const panel = document.getElementById("comparePanel");
-        const iframe = document.getElementById("contentFrame");
-        const resizeHandles = document.querySelectorAll(".resize-handle");
-
-    
-        const svg = d3.select("#main")
-                    .append("svg")
-                    .attr("width", width)
-                    .attr("height", height);
-    
-        visualizeMap(svg);
-    
-        document.getElementById("compareButton").addEventListener("click", () => {
-            if(panel.style.display === "none"){
-                let defaultOption = document.getElementById("options");
-                defaultOption.value = "option1-0";
-                iframe.src = "";
-            }
-            
-            // Display the compare panel when compare button is clicked
-            panel.style.display = "block";
-    
-            // Adjust layout if needed
-            const contentContainer = document.querySelector(".popupContainer");
-            contentContainer.style.marginRight = "620px"; // Optional adjustment for layout
-        });
-    
-        document.getElementById("options").addEventListener("change", (event) => {
-            const selectedOption = event.target.value;
-            
-            // Blur the iframe whenever the source changes
-            iframe.blur();
-            
-            if (selectedOption === "option1-1") {
-                // Load the Bar Chart HTML into the iframe
-                iframe.src = "barchart.html"; // Ensure barchart.html is in the same folder
-            } else if (selectedOption === "option1-2") {
-                // Example: Add Bubble Chart functionality if needed
-                iframe.src = "bubblechart.html"; // Set the Bubble Chart HTML if applicable
-            } else if (selectedOption === "option1-3") {
-                // Example: Add Line Chart functionality if needed
-                const countryName = 'USA'; //default is USA
-                iframe.src = `linechart.html?country=${encodeURIComponent(countryName)}`;
-            } else {
-                // Clear the iframe for invalid selections
-                iframe.src = "";
-            }
-        });
         
-        iframe.addEventListener('click', () => {
-        iframe.blur(); // Remove focus from iframe after click
-        });
+        const width = 954;
+const height = 534;
 
-        iframe.addEventListener('mousemove', () => {
-        iframe.blur(); // Ensure mouse doesn't stick to iframe when moving
-        });
+let isResizing = false;
+let isDragging = false;
+let currentHandle = null;
+let startX, startY, startWidth, startHeight, startLeft, startTop;
 
-        // Function to stop resizing and dragging interaction, resetting cursor after interaction
-        function onMouseUp() {
-        isResizing = false;
-        isDragging = false;
-        document.body.style.cursor = "default"; // Reset cursor to default after interaction
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
+const panel = document.getElementById("comparePanel");
+const iframe = document.getElementById("contentFrame");
+const resizeHandles = document.querySelectorAll(".resize-handle");
+
+const svg = d3.select("#main")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+visualizeMap(svg);
+
+document.getElementById("compareButton").addEventListener("click", () => {
+    if (panel.style.display === "none") {
+        let defaultOption = document.getElementById("options");
+        defaultOption.value = "option1-0";
+        iframe.src = "";
+    }
+
+    // Display the compare panel when compare button is clicked
+    panel.style.display = "block";
+
+    // Adjust layout if needed
+    const contentContainer = document.querySelector(".popupContainer");
+    contentContainer.style.marginRight = "620px"; // Optional adjustment for layout
+});
+
+document.getElementById("options").addEventListener("change", (event) => {
+    const selectedOption = event.target.value;
+
+    // Blur the iframe whenever the source changes
+    iframe.blur();
+
+    if (selectedOption === "option1-1") {
+        iframe.src = "barchart.html"; // Ensure barchart.html is in the same folder
+    } else if (selectedOption === "option1-2") {
+        iframe.src = "bubblechart.html";
+    } else if (selectedOption === "option1-3") {
+        const countryName = 'USA'; // default is USA
+        iframe.src = `linechart.html?country=${encodeURIComponent(countryName)}`;
+    } else {
+        iframe.src = "";
+    }
+});
+
+// Explicitly remove focus from iframe on click and mousemove events
+iframe.addEventListener('click', () => iframe.blur());
+iframe.addEventListener('mousemove', () => iframe.blur());
+
+// Handle mouse enter and mouse leave to ensure the cursor doesn't stick
+iframe.addEventListener('mouseenter', () => iframe.blur());
+iframe.addEventListener('mouseleave', () => iframe.blur());
+
+// Function to stop resizing and dragging interaction, resetting cursor after interaction
+function onMouseUp() {
+    isResizing = false;
+    isDragging = false;
+    document.body.style.cursor = "default"; // Reset cursor to default after interaction
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+}
+
+// Safari-specific fixes: Blur iframe on mouse events for Safari
+if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+    iframe.addEventListener('click', () => iframe.blur());
+    iframe.addEventListener('mousemove', () => iframe.blur());
+}
+
+// Resize logic
+resizeHandles.forEach(handle => {
+    handle.addEventListener("mousedown", (e) => {
+        isResizing = true;
+        currentHandle = handle;
+
+        // Store initial mouse position and element dimensions
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = parseInt(window.getComputedStyle(iframe).width, 10);
+        startHeight = parseInt(window.getComputedStyle(iframe).height, 10);
+        startLeft = parseInt(window.getComputedStyle(panel).left, 10);
+        startTop = parseInt(window.getComputedStyle(panel).top, 10);
+
+        console.log('mousedown - startX:', startX, 'startY:', startY, 'startWidth:', startWidth, 'startHeight:', startHeight);
+
+        // Change cursor based on the handle being dragged
+        document.body.style.cursor = getComputedStyle(handle).cursor;
+
+        // Attach mousemove and mouseup listeners
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+    });
+});
+
+// Function to handle mouse movement during resizing
+function onMouseMove(e) {
+    if (isResizing) {
+
+        let newWidth = startWidth;
+        let newHeight = startHeight;
+        let newLeft = startLeft;
+        let newTop = startTop;
+
+        if (currentHandle.classList.contains("top-left")) {
+            newWidth = Math.max(300, startWidth - (e.clientX - startX));
+            newHeight = Math.max(200, startHeight - (e.clientY - startY));
+            newLeft = startLeft + (e.clientX - startX);
+            newTop = startTop + (e.clientY - startY);
+        } else if (currentHandle.classList.contains("top-right")) {
+            newWidth = Math.max(300, startWidth + (e.clientX - startX));
+            newHeight = Math.max(200, startHeight - (e.clientY - startY));
+            newTop = startTop + (e.clientY - startY);
+        } else if (currentHandle.classList.contains("bottom-left")) {
+            newWidth = Math.max(300, startWidth - (e.clientX - startX));
+            newHeight = Math.max(200, startHeight + (e.clientY - startY));
+            newLeft = startLeft + (e.clientX - startX);
+        } else if (currentHandle.classList.contains("bottom-right")) {
+            newWidth = Math.max(300, startWidth + (e.clientX - startX));
+            newHeight = Math.max(200, startHeight + (e.clientY - startY));
         }
 
-        // afari-specific fixes
-        if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-        iframe.addEventListener('click', () => iframe.blur());
-        iframe.addEventListener('mousemove', () => iframe.blur());
-        }
+        // Apply the new dimensions to the iframe and panel
+        iframe.style.width = `${newWidth}px`;
+        iframe.style.height = `${newHeight}px`;
+        panel.style.left = `${newLeft}px`;
+        panel.style.top = `${newTop}px`;
 
-        resizeHandles.forEach(handle => {
-            handle.addEventListener("mousedown", (e) => {
-                isResizing = true;
-                currentHandle = handle;
+    } else if (isDragging) {
+        // Calculate the distance moved by the mouse
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
 
-                // Store initial mouse position and element dimensions
-                startX = e.clientX;
-                startY = e.clientY;
-                startWidth = parseInt(window.getComputedStyle(iframe).width, 10);
-                startHeight = parseInt(window.getComputedStyle(iframe).height, 10);
-                startLeft = parseInt(window.getComputedStyle(panel).left, 10);
-                startTop = parseInt(window.getComputedStyle(panel).top, 10);
+        // Move the panel
+        panel.style.left = `${startLeft + dx}px`;
+        panel.style.top = `${startTop + dy}px`;
+    }
+}
 
-                console.log('mousedown - startX:', startX, 'startY:', startY, 'startWidth:', startWidth, 'startHeight:', startHeight);
+// Function to stop resizing
+function onMouseUp() {
+    isResizing = false;
+    isDragging = false;
+    document.body.style.cursor = "default"; // Reset cursor
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+}
 
-                // Change cursor based on the handle being dragged
-                document.body.style.cursor = getComputedStyle(handle).cursor;
+panel.addEventListener("mousedown", (e) => {
+    // Only start dragging if it's not on a resize handle
+    if (e.target.classList.contains("resize-handle")) return;
 
-                // Attach mousemove and mouseup listeners
-                document.addEventListener("mousemove", onMouseMove);
-                document.addEventListener("mouseup", onMouseUp);
-            });
-        });
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
 
-        // Function to handle mouse movement during resizing
-        function onMouseMove(e) {
-            if (isResizing){
+    // Store the initial position of the panel
+    startLeft = parseInt(window.getComputedStyle(panel).left, 10);
+    startTop = parseInt(window.getComputedStyle(panel).top, 10);
 
-                let newWidth = startWidth;
-                let newHeight = startHeight;
-                let newLeft = startLeft;
-                let newTop = startTop;
+    // Attach mousemove and mouseup listeners for dragging
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+});
 
-                if (currentHandle.classList.contains("top-left")) {
-                    newWidth = Math.max(300, startWidth - (e.clientX - startX));
-                    newHeight = Math.max(200, startHeight - (e.clientY - startY));
-                    newLeft = startLeft + (e.clientX - startX);
-                    newTop = startTop + (e.clientY - startY);
-                } else if (currentHandle.classList.contains("top-right")) {
-                    newWidth = Math.max(300, startWidth + (e.clientX - startX));
-                    newHeight = Math.max(200, startHeight - (e.clientY - startY));
-                    newTop = startTop + (e.clientY - startY);
-                } else if (currentHandle.classList.contains("bottom-left")) {
-                    newWidth = Math.max(300, startWidth - (e.clientX - startX));
-                    newHeight = Math.max(200, startHeight + (e.clientY - startY));
-                    newLeft = startLeft + (e.clientX - startX);
-                } else if (currentHandle.classList.contains("bottom-right")) {
-                    newWidth = Math.max(300, startWidth + (e.clientX - startX));
-                    newHeight = Math.max(200, startHeight + (e.clientY - startY));
-                }
+function closeComparePanel() {
+    const panel = document.getElementById("comparePanel");
+    panel.style.display = "none";
 
-                // Apply the new dimensions to the iframe and panel
-                iframe.style.width = `${newWidth}px`;
-                iframe.style.height = `${newHeight}px`;
-                panel.style.left = `${newLeft}px`;
-                panel.style.top = `${newTop}px`;
+    // Reset the layout of contentContainer
+    const contentContainer = document.querySelector(".popupContainer");
+    contentContainer.style.marginRight = "0";
 
-            } else if (isDragging) {
-                // Calculate the distance moved by the mouse
-                const dx = e.clientX - dragStartX;
-                const dy = e.clientY - dragStartY;
+    // Clear the iframe content
+    const iframe = document.getElementById("contentFrame");
+    iframe.src = "";
+}
 
-                // Move the panel
-                panel.style.left = `${startLeft + dx}px`;
-               
-                panel.style.top = `${startTop + dy}px`;
-            }
-        }
-
-        // Function to stop resizing
-        function onMouseUp() {
-            isResizing = false;
-            isDragging = false;
-            document.body.style.cursor = "default"; // Reset cursor
-            document.removeEventListener("mousemove", onMouseMove);
-            document.removeEventListener("mouseup", onMouseUp);
-        }
-
-        panel.addEventListener("mousedown", (e) => {
-            // Only start dragging if it's not on a resize handle
-            if (e.target.classList.contains("resize-handle")) return;
-
-            isDragging = true;
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-
-            // Store the initial position of the panel
-            startLeft = parseInt(window.getComputedStyle(panel).left, 10);
-            startTop = parseInt(window.getComputedStyle(panel).top, 10);
-
-            // Attach mousemove and mouseup listeners for dragging
-            document.addEventListener("mousemove", onMouseMove);
-            document.addEventListener("mouseup", onMouseUp);
-        });
-    
-        function closeComparePanel() {
-            const panel = document.getElementById("comparePanel");
-            panel.style.display = "none";
-    
-            // Reset the layout of contentContainer
-            const contentContainer = document.querySelector(".popupContainer");
-            contentContainer.style.marginRight = "0";
-    
-            // Clear the iframe content
-            const iframe = document.getElementById("contentFrame");
-            iframe.src = "";
-        }
     </script
     </body>
 </html>

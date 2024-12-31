@@ -166,7 +166,10 @@
     
         document.getElementById("options").addEventListener("change", (event) => {
             const selectedOption = event.target.value;
-    
+            
+            // Blur the iframe whenever the source changes
+            iframe.blur();
+            
             if (selectedOption === "option1-1") {
                 // Load the Bar Chart HTML into the iframe
                 iframe.src = "barchart.html"; // Ensure barchart.html is in the same folder

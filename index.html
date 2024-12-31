@@ -185,6 +185,14 @@
                 iframe.src = "";
             }
         });
+        
+        iframe.addEventListener('click', () => {
+        iframe.blur(); // Remove focus from iframe after click
+        });
+
+        iframe.addEventListener('mousemove', () => {
+        iframe.blur(); // Ensure mouse doesn't stick to iframe when moving
+        });
 
         resizeHandles.forEach(handle => {
             handle.addEventListener("mousedown", (e) => {

@@ -194,6 +194,21 @@
         iframe.blur(); // Ensure mouse doesn't stick to iframe when moving
         });
 
+        // Function to stop resizing and dragging interaction, resetting cursor after interaction
+        function onMouseUp() {
+        isResizing = false;
+        isDragging = false;
+        document.body.style.cursor = "default"; // Reset cursor to default after interaction
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+        }
+
+        // afari-specific fixes
+        if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+        iframe.addEventListener('click', () => iframe.blur());
+        iframe.addEventListener('mousemove', () => iframe.blur());
+        }
+
         resizeHandles.forEach(handle => {
             handle.addEventListener("mousedown", (e) => {
                 isResizing = true;

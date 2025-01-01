@@ -166,10 +166,7 @@
     
         document.getElementById("options").addEventListener("change", (event) => {
             const selectedOption = event.target.value;
-            
-            // Blur the iframe whenever the source changes
-            iframe.blur();
-            
+    
             if (selectedOption === "option1-1") {
                 // Load the Bar Chart HTML into the iframe
                 iframe.src = "barchart.html"; // Ensure barchart.html is in the same folder
@@ -179,35 +176,12 @@
             } else if (selectedOption === "option1-3") {
                 // Example: Add Line Chart functionality if needed
                 const countryName = 'USA'; //default is USA
-                iframe.src = linechart.html?country=${encodeURIComponent(countryName)};
+                iframe.src = `linechart.html?country=${encodeURIComponent(countryName)}`;
             } else {
                 // Clear the iframe for invalid selections
                 iframe.src = "";
             }
         });
-        
-        iframe.addEventListener('click', () => {
-        iframe.blur(); // Remove focus from iframe after click
-        });
-
-        iframe.addEventListener('mousemove', () => {
-        iframe.blur(); // Ensure mouse doesn't stick to iframe when moving
-        });
-
-        // Function to stop resizing and dragging interaction, resetting cursor after interaction
-        function onMouseUp() {
-        isResizing = false;
-        isDragging = false;
-        document.body.style.cursor = "default"; // Reset cursor to default after interaction
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
-        }
-
-        // afari-specific fixes
-        if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-        iframe.addEventListener('click', () => iframe.blur());
-        iframe.addEventListener('mousemove', () => iframe.blur());
-        }
 
         resizeHandles.forEach(handle => {
             handle.addEventListener("mousedown", (e) => {
@@ -261,10 +235,10 @@
                 }
 
                 // Apply the new dimensions to the iframe and panel
-                iframe.style.width = ${newWidth}px;
-                iframe.style.height = ${newHeight}px;
-                panel.style.left = ${newLeft}px;
-                panel.style.top = ${newTop}px;
+                iframe.style.width = `${newWidth}px`;
+                iframe.style.height = `${newHeight}px`;
+                panel.style.left = `${newLeft}px`;
+                panel.style.top = `${newTop}px`;
 
             } else if (isDragging) {
                 // Calculate the distance moved by the mouse
@@ -272,9 +246,9 @@
                 const dy = e.clientY - dragStartY;
 
                 // Move the panel
-                panel.style.left = ${startLeft + dx}px;
+                panel.style.left = `${startLeft + dx}px`;
                
-                panel.style.top = ${startTop + dy}px;
+                panel.style.top = `${startTop + dy}px`;
             }
         }
 
